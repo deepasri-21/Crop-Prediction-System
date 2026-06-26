@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Crop Prediction System</title>
+
+<link rel="stylesheet" href="{{url_for('static',filename='style.css')}}">
+
+</head>
+
+
+<body>
+
+
+<h1>🌱 CROP PREDICTION<br>SYSTEM 🌱</h1>
+
+
+
+<div class="container">
+
+
+
+{% if page=="home" %}
+
+
+<h2>Welcome to the Crop Prediction System.</h2>
+
+
+<p>
+"Empowering Farmers, Enhancing Yields - Smarter Agriculture for a Better Tomorrow!"
+</p>
+
+
+
+<a href="/crop">
+<button type="button">
+🌱 Crop Recommendation 🌱
+</button>
+</a>
+
+
+<a href="/price">
+<button type="button">
+💰 Price Prediction 💰
+</button>
+</a>
+
+
+
+<a href="/pest">
+<button type="button">
+🐛 Pest Prediction 🐛
+</button>
+</a>
+
+
+
+{% endif %}
+
+
+
+
+
+
+
+
+{% if page=="crop" %}
+
+
+<h2>🌱 Crop Recommendation 🌱</h2>
+
+
+<form action="/predict_crop" method="post">
+
+
+<input name="soil" placeholder="Soil Type" required>
+
+
+<input name="ph" placeholder="pH Level" required>
+
+
+<input name="rainfall" placeholder="Rainfall" required>
+
+
+<input name="temperature" placeholder="Temperature" required>
+
+
+<input name="season" placeholder="Season" required>
+
+
+
+<button type="submit">
+Predict
+</button>
+
+
+</form>
+
+
+
+
+{% if result %}
+
+<div class="popup">
+
+<p>{{ result | safe }}</p>
+
+
+<a href="/crop">
+
+<button type="button">
+Go Back
+</button>
+
+</a>
+
+
+</div>
+
+{% endif %}
+
+
+
+
+
+<a href="/">
+
+<button type="button">
+Back Home
+</button>
+
+</a>
+
+
+
+{% endif %}
+
+
+
+
+
+
+
+
+
+
+{% if page=="price" %}
+
+
+
+<h2>💰 Price Prediction 💰</h2>
+
+
+
+<form action="/predict_price" method="post">
+
+
+<input name="crop" placeholder="Crop Name" required>
+
+
+<input name="month" placeholder="Month" required>
+
+
+
+<button type="submit">
+Predict
+</button>
+
+
+</form>
+
+
+
+
+
+{% if result %}
+
+
+<div class="popup">
+
+
+<p>{{ result | safe }}</p>
+
+
+
+<a href="/price">
+
+
+<button type="button">
+Go Back
+</button>
+
+
+</a>
+
+
+</div>
+
+
+{% endif %}
+
+
+
+
+<a href="/">
+
+<button type="button">
+Back Home
+</button>
+
+</a>
+
+
+
+
+{% endif %}
+
+
+
+
+
+
+
+
+
+{% if page=="pest" %}
+
+
+
+
+<h2>🐛 Pest Prediction 🐛</h2>
+
+
+
+<form action="/predict_pest" method="post">
+
+
+
+<input name="crop" placeholder="Crop Name" required>
+
+
+<input name="symptoms" placeholder="Symptoms" required>
+
+
+
+
+<button type="submit">
+Predict
+</button>
+
+
+</form>
+
+
+
+
+
+
+{% if result %}
+
+
+<div class="popup">
+
+
+<p>{{ result | safe }}</p>
+
+
+
+<a href="/pest">
+
+
+<button type="button">
+Go Back
+</button>
+
+
+</a>
+
+
+</div>
+
+
+{% endif %}
+
+
+
+
+
+<a href="/">
+
+<button type="button">
+Back Home
+</button>
+
+</a>
+
+
+
+{% endif %}
+
+
+
+
+</div>
+
+
+</body>
+
+</html>
