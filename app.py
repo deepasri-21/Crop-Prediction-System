@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request
 import pymysql
-import os
 from flask_cors import CORS
 
 
@@ -10,24 +9,29 @@ app = Flask(
     static_folder='static'
 )
 
+
 CORS(app)
+
 
 
 def get_connection():
 
     return pymysql.connect(
-        host=os.environ.get("MYSQL_HOST", "localhost"),
-        port=int(os.environ.get("MYSQL_PORT", 3306)),
-        user=os.environ.get("MYSQL_USER", "root"),
-        password=os.environ.get("MYSQL_PASSWORD", "Deepasri"),
-        database=os.environ.get("MYSQL_DATABASE", "prediction_db"),
+        host="localhost",
+        port=3306,
+        user="root",
+        password="Deepasri",
+        database="prediction_db",
         cursorclass=pymysql.cursors.DictCursor
     )
 
 
 
+
+
 @app.route('/')
 def home():
+
     return render_template(
         'index.html',
         page="home"
@@ -35,8 +39,11 @@ def home():
 
 
 
+
+
 @app.route('/crop')
 def crop():
+
     return render_template(
         'index.html',
         page="crop"
@@ -44,8 +51,11 @@ def crop():
 
 
 
+
+
 @app.route('/price')
 def price():
+
     return render_template(
         'index.html',
         page="price"
@@ -53,8 +63,11 @@ def price():
 
 
 
+
+
 @app.route('/pest')
 def pest():
+
     return render_template(
         'index.html',
         page="pest"
@@ -63,8 +76,14 @@ def pest():
 
 
 
+
+
+
+
+
 @app.route('/predict_crop', methods=['POST'])
 def predict_crop():
+
 
     soil = request.form.get('soil')
     ph = float(request.form.get('ph'))
@@ -73,8 +92,10 @@ def predict_crop():
     season = request.form.get('season')
 
 
+
     connection = get_connection()
     cursor = connection.cursor()
+
 
 
     query = """
@@ -84,6 +105,7 @@ def predict_crop():
     AND rainfall BETWEEN %s AND %s
     AND temperature BETWEEN %s AND %s
     """
+
 
 
     cursor.execute(
@@ -101,9 +123,11 @@ def predict_crop():
     )
 
 
+
     result = cursor.fetchone()
 
     connection.close()
+
 
 
     output = (
@@ -112,6 +136,7 @@ def predict_crop():
         else
         "No recommendation found"
     )
+
 
 
     return render_template(
@@ -125,15 +150,21 @@ def predict_crop():
 
 
 
+
+
+
 @app.route('/predict_price', methods=['POST'])
 def predict_price():
+
 
     crop = request.form.get('crop')
     month = request.form.get('month')
 
 
+
     connection = get_connection()
     cursor = connection.cursor()
+
 
 
     query = """
@@ -143,10 +174,12 @@ def predict_price():
     """
 
 
+
     cursor.execute(
         query,
         (crop, month)
     )
+
 
 
     result = cursor.fetchone()
@@ -155,10 +188,11 @@ def predict_price():
 
 
 
+
     output = (
 
-        f"Price per kg: {result['price_per_kg']}<br>"
-        f"Export Place: {result['export_place']}<br>"
+        f"Price per kg: {result['price_per_kg']}\n"
+        f"Export Place: {result['export_place']}\n"
         f"Crop Type: {result['crop_type']}"
 
         if result
@@ -181,6 +215,11 @@ def predict_price():
 
 
 
+
+
+
+
+
 @app.route('/predict_pest', methods=['POST'])
 def predict_pest():
 
@@ -189,8 +228,10 @@ def predict_pest():
     symptoms = request.form.get('symptoms')
 
 
+
     connection = get_connection()
     cursor = connection.cursor()
+
 
 
     query = """
@@ -200,10 +241,12 @@ def predict_pest():
     """
 
 
+
     cursor.execute(
         query,
         (crop, symptoms)
     )
+
 
 
     result = cursor.fetchone()
@@ -213,10 +256,12 @@ def predict_pest():
 
 
 
+
+
     output = (
 
-        f"Pest: {result['pest']}<br>"
-        f"Pesticide: {result['pesticide']}<br>"
+        f"Pest: {result['pest']}\n"
+        f"Pesticide: {result['pesticide']}\n"
         f"Application Method: {result['application_method']}"
 
         if result
@@ -226,6 +271,9 @@ def predict_pest():
         "Data not available"
 
     )
+
+
+
 
 
     return render_template(
@@ -239,9 +287,7 @@ def predict_pest():
 
 
 
+
 if __name__ == "__main__":
 
-    app.run(
-        host="0.0.0.0",
-        port=int(os.environ.get("PORT",5000))
-    )
+    app.run()
