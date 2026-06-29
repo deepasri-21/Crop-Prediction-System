@@ -2,7 +2,12 @@ from flask import Flask, render_template, request
 import pymysql
 from flask_cors import CORS
 
-app = Flask(__name__, template_folder='templates', static_folder='static')
+app = Flask(
+    __name__,
+    template_folder='templates',
+    static_folder='static'
+)
+
 CORS(app)
 
 
@@ -18,7 +23,7 @@ def get_connection():
     )
 
 
-# ---------------- HOME ROUTES ----------------
+# ---------------- HOME ----------------
 
 @app.route('/')
 def home():
@@ -40,121 +45,200 @@ def pest():
     return render_template('index.html', page="pest")
 
 
-# ---------------- CROP PREDICTION ----------------
+
+# ---------------- CROP ----------------
 
 @app.route('/predict_crop', methods=['POST'])
 def predict_crop():
+
     try:
         soil = request.form.get('soil')
-        ph = float(request.form.get('ph') or 0)
-        rainfall = float(request.form.get('rainfall') or 0)
-        temperature = float(request.form.get('temperature') or 0)
+        ph = float(request.form.get('ph'))
+        rainfall = float(request.form.get('rainfall'))
+        temperature = float(request.form.get('temperature'))
         season = request.form.get('season')
+
 
         conn = get_connection()
         cursor = conn.cursor()
 
-        query = """
-        SELECT recommended_crop
-        FROM crop_recommendations
-        WHERE soil_type=%s AND season=%s
-        AND ph BETWEEN %s AND %s
-        AND rainfall BETWEEN %s AND %s
-        AND temperature BETWEEN %s AND %s
-        """
 
-        cursor.execute(query, (
-            soil,
-            season,
-            ph - 0.5, ph + 0.5,
-            rainfall - 50, rainfall + 50,
-            temperature - 5, temperature + 5
-        ))
+        cursor.execute(
+            """
+            SELECT recommended_crop 
+            FROM crop_recommendations
+            WHERE soil_type=%s 
+            AND season=%s
+            AND ph BETWEEN %s AND %s
+            AND rainfall BETWEEN %s AND %s
+            AND temperature BETWEEN %s AND %s
+            """,
+            (
+                soil,
+                season,
+                ph-0.5,
+                ph+0.5,
+                rainfall-50,
+                rainfall+50,
+                temperature-5,
+                temperature+5
+            )
+        )
+
 
         result = cursor.fetchone()
         conn.close()
 
-        output = f"Recommended Crop: {result['recommended_crop']}" if result else "No recommendation found"
+
+        if result:
+            output = "Recommended Crop: " + result["recommended_crop"]
+        else:
+            output = "No recommendation found"
+
 
     except Exception as e:
-        output = f"Error: {str(e)}"
-
-    return render_template('index.html', page="crop", result=output)
+        output = "Error: " + str(e)
 
 
-# ---------------- PRICE PREDICTION ----------------
+
+    return render_template(
+        'index.html',
+        page="crop",
+        result=output
+    )
+
+
+
+
+
+# ---------------- PRICE ----------------
+
 
 @app.route('/predict_price', methods=['POST'])
 def predict_price():
+
     try:
+
         crop = request.form.get('crop')
         month = request.form.get('month')
 
+
         conn = get_connection()
         cursor = conn.cursor()
 
-        query = """
-        SELECT price_per_kg, export_place, crop_type
-        FROM price_predicts
-        WHERE crop_name=%s AND month=%s
-        """
 
-        cursor.execute(query, (crop, month))
+        cursor.execute(
+            """
+            SELECT price_per_kg,export_place,crop_type
+            FROM price_predicts
+            WHERE crop_name=%s AND month=%s
+            """,
+            (crop,month)
+        )
+
+
         result = cursor.fetchone()
         conn.close()
 
+
+
         if result:
+
             output = (
-                f"Price per kg: {result.get('price_per_kg')}\n"
-                f"Export Place: {result.get('export_place')}\n"
-                f"Crop Type: {result.get('crop_type')}"
+                "Price per kg: " + str(result["price_per_kg"]) +
+                "<br>Export Place: " + result["export_place"] +
+                "<br>Crop Type: " + result["crop_type"]
             )
+
         else:
-            output = "Data not available"
+
+            output="Data not available"
+
+
 
     except Exception as e:
-        output = f"Error: {str(e)}"
 
-    return render_template('index.html', page="price", result=output)
+        output="Error: "+str(e)
 
 
-# ---------------- PEST PREDICTION ----------------
+
+    return render_template(
+        'index.html',
+        page="price",
+        result=output
+    )
+
+
+
+
+
+# ---------------- PEST ----------------
+
 
 @app.route('/predict_pest', methods=['POST'])
 def predict_pest():
+
     try:
-        crop = request.form.get('crop')
-        symptoms = request.form.get('symptoms')
 
-        conn = get_connection()
-        cursor = conn.cursor()
+        crop=request.form.get('crop')
+        symptoms=request.form.get('symptoms')
 
-        query = """
-        SELECT pest, pesticide, application_method
-        FROM pest_predicts
-        WHERE crop=%s AND symptoms=%s
-        """
 
-        cursor.execute(query, (crop, symptoms))
-        result = cursor.fetchone()
+        conn=get_connection()
+        cursor=conn.cursor()
+
+
+        cursor.execute(
+            """
+            SELECT pest,pesticide,application_method
+            FROM pest_predicts
+            WHERE crop=%s AND symptoms=%s
+            """,
+            (crop,symptoms)
+        )
+
+
+        result=cursor.fetchone()
         conn.close()
 
+
+
         if result:
-            output = (
-                f"Pest: {result.get('pest')}\n"
-                f"Pesticide: {result.get('pesticide')}\n"
-                f"Application Method: {result.get('application_method')}"
+
+            output=(
+                "Pest: "+result["pest"]+
+                "<br>Pesticide: "+result["pesticide"]+
+                "<br>Application Method: "+result["application_method"]
             )
+
         else:
-            output = "Data not available"
+
+            output="Data not available"
+
+
 
     except Exception as e:
-        output = f"Error: {str(e)}"
 
-    return render_template('index.html', page="pest", result=output)
+        output="Error: "+str(e)
 
 
-# ---------------- RUN APP ----------------
 
-if __name__ == "__main__":
-    app.run(debug=True)
+
+    return render_template(
+        'index.html',
+        page="pest",
+        result=output
+    )
+
+
+
+
+
+# ---------------- RUN ----------------
+
+if __name__=="__main__":
+    app.run(
+        debug=True,
+        host="127.0.0.1",
+        port=5000
+    )
